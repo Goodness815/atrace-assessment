@@ -1,101 +1,98 @@
-import Image from "next/image";
+"use client"
+import DashboardLayout from "@/components/DashboardLayout"; // Import DashboardLayout component
+import ProductForm from "@/components/ProductForm"; // Import ProductForm component
+import ProductTable from "@/components/ProductTable"; // Import ProductTable component
+import SummaryBox from "@/components/SummaryBox"; // Import SummaryBox component
+import useStore, { Product } from "@/utils/zustandStore"; // Import Zustand store for state management
+import { useState } from "react"; // Import useState hook from React
 
-export default function Home() {
+// Main component for the Home Page
+export default function HomePage() {
+  // Destructure methods and properties from Zustand store
+  const {
+    products,
+    fetchProducts,
+    countProducts,
+    productsByStatus,
+    deleteProduct,
+  } = useStore();
+
+  // Local state for managing modal visibility and selected product for editing
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<Partial<Product> | null>(null);
+
+  // Get total product count and status counts (pending, delivered, cancelled)
+  const totalProducts = countProducts();
+  const { pending, delivered, cancelled } = productsByStatus();
+
+  // Function to open the modal and set the selected product (for editing)
+  const handleOpenModal = (product: Partial<Product> | null = null) => {
+    setSelectedProduct(product); // Set the selected product (if any)
+    setIsModalOpen(true); // Open the modal
+  };
+
+  // Function to close the modal and reset the selected product
+  const handleCloseModal = () => {
+    setIsModalOpen(false); // Close the modal
+    setSelectedProduct(null); // Reset the selected product
+  };
+
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+    <DashboardLayout> {/* Wrap the content inside the dashboard layout */}
+      <main className="md:p-6 text-black">
+        <header className="mb-6">
+          <h1 className="text-2xl font-bold">Dashboard</h1> 
+        </header>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+        {/* Section to show summary of total products and product statuses */}
+        <section className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          <SummaryBox title="Total Products" value={totalProducts} /> {/* Total products summary */}
+          <SummaryBox title="Pending" value={pending} /> {/* Pending products summary */}
+          <SummaryBox title="Delivered" value={delivered} /> {/* Delivered products summary */}
+          <SummaryBox title="Cancelled" value={cancelled} /> {/* Cancelled products summary */}
+        </section>
+
+        <section>
+          {/* Button to open the modal for adding a new product */}
+          <div className="w-full flex items-center justify-end">
+          <button 
+            className="bg-green-400 self-end my-2 text-white px-3 py-1 rounded hover:bg-gray-600 disabled:opacity-50"
+            onClick={() => setIsModalOpen(true)} // Open modal when clicked
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
+            Add Product
+          </button>
+          </div>
+
+          {/* Product Table */}
+          <ProductTable
+            products={products} // List of products to display
+            fetchProducts={fetchProducts} // Fetch products function
+            deleteProduct={deleteProduct} // Delete product function
+            onEditProduct={handleOpenModal} // Callback to open modal for editing a product
+          />
+        </section>
+
+        {/* Modal for Product Form */}
+        {isModalOpen && (
+          <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 z-40 p-8">
+            {/* Modal overlay */}
+            <div className="bg-white p-6 relative rounded shadow w-full max-w-4xl">
+              {/* Modal content */}
+              <button
+                onClick={handleCloseModal} // Close the modal when clicked
+                className="absolute top-1 right-4 text-black text-2xl"
+              >
+                &times; {/* Close button */}
+              </button>
+              {/* Product form component to create or edit a product */}
+              <ProductForm
+                initialData={selectedProduct || {}} // Pass selected product data or empty object
+                onClose={handleCloseModal} // Close the modal after form submission
+              />
+            </div>
+          </div>
+        )}
       </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+    </DashboardLayout>
   );
 }
