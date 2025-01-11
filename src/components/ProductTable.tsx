@@ -1,6 +1,6 @@
 "use client"; // Indicating the component is rendered on the client side (Next.js)
 
-import React, { useState, useEffect } from "react"; // Import React and the useState and useEffect hooks
+import React, { useState } from "react"; // Import React and the useState and useEffect hooks
 import { Product } from "../utils/zustandStore"; // Import the Product type from Zustand store
 
 // Define the props for the ProductTable component
@@ -11,8 +11,7 @@ interface ProductTableProps {
   onEditProduct: (product: Product) => void; // Function to edit a product (opens the modal)
 }
 
-const ProductTable: React.FC<ProductTableProps> = ({
-  products, // Array of products passed as a prop
+const ProductTable: React.FC<ProductTableProps> = ({ 
   fetchProducts, // Function to fetch products passed as a prop
   deleteProduct, // Function to delete a product passed as a prop
   onEditProduct, // Function to open the modal passed as a prop
