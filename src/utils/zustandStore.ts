@@ -38,7 +38,17 @@ interface State {
 // Creating the store using Zustand
 const useStore = create<State>((set, get) => ({
   // Initialize the products state from localStorage (if available), or default to an empty array
-  products: JSON.parse(localStorage.getItem('products') || '[]'),
+  products: [],
+
+  // Ensure `localStorage` is accessed only on the client-side
+  syncWithLocalStorage: () => {
+    if (typeof window !== 'undefined') {
+      const storedProducts = localStorage.getItem('products');
+      if (storedProducts) {
+        set({ products: JSON.parse(storedProducts) });
+      }
+    }
+  },
 
   // Function to fetch products based on pagination
   fetchProducts: (page, pageSize) => {
@@ -67,7 +77,9 @@ const useStore = create<State>((set, get) => ({
         ...state.products,
         { id: crypto.randomUUID(), ...product }, // Add the new product to the list (default status is 'Pending')
       ];
-      localStorage.setItem('products', JSON.stringify(updatedProducts)); // Sync the updated products list to localStorage
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('products', JSON.stringify(updatedProducts)); // Sync the updated products list to localStorage
+      }
       return { products: updatedProducts }; // Update the state with the new list of products
     });
   },
@@ -79,7 +91,9 @@ const useStore = create<State>((set, get) => ({
       const updatedProducts = state.products.map((p) =>
         p.id === id ? { ...p, ...updatedProduct } : p // Merge updated product details into the existing product
       );
-      localStorage.setItem('products', JSON.stringify(updatedProducts)); // Sync the updated list to localStorage
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('products', JSON.stringify(updatedProducts)); // Sync the updated list to localStorage
+      }
       return { products: updatedProducts }; // Update the state with the new list of products
     });
   },
@@ -89,16 +103,11 @@ const useStore = create<State>((set, get) => ({
     set((state) => {
       // Filter out the product to delete by its id
       const updatedProducts = state.products.filter((p) => p.id !== id);
-      localStorage.setItem('products', JSON.stringify(updatedProducts)); // Sync the updated list to localStorage
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('products', JSON.stringify(updatedProducts)); // Sync the updated list to localStorage
+      }
       return { products: updatedProducts }; // Update the state with the new list of products
     });
-  },
-
-  // Function to sync the state with the products stored in localStorage
-  syncWithLocalStorage: () => {
-    set(() => ({
-      products: JSON.parse(localStorage.getItem('products') || '[]'), // Get products from localStorage and update state
-    }));
   },
 }));
 
