@@ -112,7 +112,6 @@ In this project, the store is defined in a custom hook located in the `utils/zus
 
 To access or modify the state within a component, you can use the custom `useStore` hook. Here's an example of how to create a new product:
 
-```ts
 const { createProduct } = useStore();
 
 const newProduct = {
@@ -144,8 +143,6 @@ This project uses **Tailwind CSS**, a utility-first CSS framework that allows de
 Tailwind CSS is used throughout the project for layout, styling, and responsiveness. The main utility classes are applied directly within JSX elements to style components.
 
 For example:
-
-```jsx
 <button className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
   Save Product
 </button>
